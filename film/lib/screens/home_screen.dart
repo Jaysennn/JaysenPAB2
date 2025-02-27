@@ -2,6 +2,7 @@ import 'package:film/models/movie.dart';
 import 'package:film/services/api_service.dart';
 import 'package:flutter/material.dart';
 
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -10,21 +11,32 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final ApiService _apiServices = ApiService();
+  final ApiService _apiService = ApiService();
   List<Movie> _allMovie = [];
+  List<Movie> _trendingMovies = [];
+  List<Movie> _popularMovies = [];
 
-  Future<void> _loadMovies() async {
-    final List<Map<String, dynamic>> allMoviesData = await _apiServices.getAllMovies();
+  Future<void> _loadMovie() async {
+    final List<Map<String, dynamic>> allMoviesData =
+        await _apiService.getAllMovies();
+    final List<Map<String, dynamic>> TrendingMoviesData =
+        await _apiService.getTrendingMovies();
+    final List<Map<String, dynamic>> popularMoviesData =
+        await _apiService.getPopularMovies();
 
     setState(() {
       _allMovie = allMoviesData.map((e) => Movie.fromJson(e)).toList();
+      _trendingMovies =
+          TrendingMoviesData.map((e) => Movie.fromJson(e)).toList();
+      _popularMovies = popularMoviesData.map((e) => Movie.fromJson(e)).toList();
     });
   }
 
   @override
   void initState() {
+    // TODO: implement initState
     super.initState();
-    _loadMovies();
+    _loadMovie();
   }
 
   @override
@@ -34,50 +46,60 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text("Pilem"),
       ),
       body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                "All Movies",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-            ),
-            SizedBox(
-              height: 200,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: _allMovie.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final Movie movie = _allMovie[index];
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        Image.network(
-                          movie.posterUrl, // Pastikan Movie memiliki field ini
-                          height: 150,
-                          width: 100,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Icon(Icons.broken_image, size: 100),
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          movie.title,
-                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            )
-          ],
+          child: Column(
+        children: [
+          _buildMoviesList("All Movies", _allMovie),
+          _buildMoviesList("Trending Movies", _trendingMovies),
+          _buildMoviesList("Popular Movies", _popularMovies)
+        ],
+      )),
+    );
+  }
+
+  @override
+  Widget _buildMoviesList(String title, List<Movie> movies) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.all(8),
+          child: Text(
+            title,
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
         ),
-      ),
+        SizedBox(
+          height: 200,
+          child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: movies.length,
+              itemBuilder: (BuildContext context, int index) {
+                final Movie movie = movies[index];
+                return Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Column(
+                    children: [
+                      Image.network(
+                        'https://image.tmdb.org/t/p/w500${movie.posterPath}',
+                        height: 150,
+                        width: 150,
+                        fit: BoxFit.cover,
+                      ),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      Text(
+                        movie.title.length > 14
+                            ? '${movie.title.substring(0, 10)}...'
+                            : movie.title,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      )
+                    ],
+                  ),
+                );
+              }),
+        ),
+      ],
     );
   }
 }

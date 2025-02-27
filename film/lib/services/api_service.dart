@@ -18,7 +18,7 @@ class ApiService{
 
   Future<List<Map<String, dynamic>>> getTrendingMovies()async{
     final response = await http.get(
-      Uri.parse("$baseUrl/movie/week?api_key=$apiKey"),
+      Uri.parse("$baseUrl/trending/movie/week?api_key=$apiKey"),
     );
     final data = json.decode(response.body);
     return List<Map<String, dynamic>>.from(data['results']);
