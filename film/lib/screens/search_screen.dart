@@ -89,8 +89,17 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
             const SizedBox(height: 16,),
             ListView.builder(
-              itemBuilder: (context, index){
-
+              itemCount: _searchResult.length,
+              itemBuilder: (BuildContext context, int index){
+                final Movie movie = _searchResult[index];
+                return ListTile(
+                  leading: Image.network(
+                    movie.posterPath != '' ?
+                    'https://image.tmdb.org/t/p/w500${movie.posterPath}' :
+                    'https://'
+                  ),
+                  title: Text(movie.title),
+                );
               },
             ),
           ],
