@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:film/models/movie.dart';
+import 'package:film/screens/detail_screen.dart';
 import 'package:film/services/api_service.dart';
 import 'package:flutter/material.dart';
 
@@ -88,19 +90,39 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
             ),
             const SizedBox(height: 16,),
-            ListView.builder(
-              itemCount: _searchResult.length,
-              itemBuilder: (BuildContext context, int index){
-                final Movie movie = _searchResult[index];
-                return ListTile(
-                  leading: Image.network(
-                    movie.posterPath != '' ?
-                    'https://image.tmdb.org/t/p/w500${movie.posterPath}' :
-                    'https://'
-                  ),
-                  title: Text(movie.title),
-                );
-              },
+            Expanded(
+              child: ListView.builder(
+                itemCount: _searchResult.length,
+                itemBuilder: (BuildContext context, int index){
+                  final Movie movie = _searchResult[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: ListTile(
+                      leading: CachedNetworkImage(
+                        imageUrl:  'https://image.tmdb.org/t/p/w500${movie.posterPath}',
+                        height: 50,
+                        width: 50,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url){
+                          return Center(
+                            child: CircularProgressIndicator(color: Colors.blue,),
+                          );
+                        },
+                        errorWidget: (context, url, error) => Icon(Icons.error),
+                      ),
+                      title: Text(movie.title),
+                      onTap: () {
+                        Navigator.push(
+                          context, 
+                          MaterialPageRoute(
+                            builder: (context) => DetailScreen(movie: movie)
+                          )
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),
